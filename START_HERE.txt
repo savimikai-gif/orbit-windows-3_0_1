@@ -1,0 +1,9 @@
+ORBIT 3.2.1 — integrated Windows application SOURCE (not an already compiled EXE)
+
+1. Read README.md and RELEASE_CHECKLIST.md.
+2. Upload the CONTENTS of this ORBIT_3_2_1 folder to your orbit-windows GitHub repo root.
+3. Run GitHub Actions → Build ORBIT 3.2.1 for Windows.
+4. Once the workflow succeeds, download the ORBIT-3.2.1-Windows artifact and install ORBIT_3_2_1_Setup.exe.
+5. Test typed commands FIRST. For microphone problems, use Settings → Assistant diagnostics.
+
+Voice limitation: The built-in Windows speech recognizer and Romanian TTS require installed Windows language components. This package does NOT contain an AI speech recognition model.
