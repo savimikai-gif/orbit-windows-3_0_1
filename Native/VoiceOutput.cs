@@ -26,13 +26,15 @@ internal sealed class VoiceOutput : IDisposable
     {
         if (synth is not null) return;
         synth = new SpeechSynthesizer();
-        synth.SpeakStarted += (_, _) =>
+        synth.SpeakStarted += (_, e) =>
         {
+            lock (gate) { if (e.Prompt != current) return; }
             AssistantDiagnostics.Write("tts", "Windows speech started");
             StatusChanged?.Invoke("speaking", "Speaking");
         };
         synth.SpeakCompleted += (_, e) =>
         {
+            lock (gate) { if (e.Prompt != current) return; current = null; }
             AssistantDiagnostics.Write("tts", e.Error is not null ? "speech failed: " + e.Error.Message : e.Cancelled ? "speech cancelled" : "speech completed");
             if (e.Error is not null) StatusChanged?.Invoke("error", "Voice output failed: " + e.Error.Message);
             else StatusChanged?.Invoke("idle", "Voice output completed");
@@ -85,3 +87,4 @@ internal sealed class VoiceOutput : IDisposable
         lock (gate) { synth?.Dispose(); synth = null; current = null; }
     }
 }
+

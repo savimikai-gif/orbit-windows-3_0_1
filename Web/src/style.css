@@ -761,3 +761,8 @@ body.orbit-sidebar-collapsed #appView .nav-btn:is(:hover,:focus-visible)::after 
 #appView .orbit-edge-slider::-moz-range-track {height:7px;}
 #appView .orbit-edge-slider::-moz-range-thumb {width:18px;height:18px;transition:none;}
 
+/* Follow the audio playback lifetime, including long replies. */
+body.orbit-speaking #appView .designobo-orb {animation:orbitSpeakingPulse .8s ease-in-out infinite;}
+body.orbit-speaking #appView .designobo-arc.outer {animation-duration:5s;}
+@keyframes orbitSpeakingPulse {0%,100%{transform:scale(1);filter:brightness(1.1)}50%{transform:scale(1.16);filter:brightness(1.5)}}
+

@@ -20,4 +20,9 @@ assert.equal(matchApps('word',apps).length,1);
 assert.equal(matchApps('unknown',apps).length,0);
 assert.equal(matchApps('microsoft',apps).length,2);
 console.log('Command parser and app matching checks passed');
+for(let percent=0;percent<=100;percent++) {
+  assert.deepEqual(parse(`Hey Orbit volume ${percent}%`),{command:'volume_set',args:{percent}});
+}
+assert.deepEqual(parse('Hey Orbit open Brave'),{app:'brave'});
+assert.deepEqual(parse('Hey Orbit brightness 60%'),{command:'brightness_set',args:{percent:60}});
 

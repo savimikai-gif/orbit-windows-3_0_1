@@ -72,7 +72,19 @@ internal sealed class SpeechController : IDisposable
                 recognizer.EndSilenceTimeout = TimeSpan.FromMilliseconds(900);
                 recognizer.EndSilenceTimeoutAmbiguous = TimeSpan.FromMilliseconds(1200);
                 var builder = new GrammarBuilder { Culture = info.Culture };
-                builder.Append(new Choices("hey orbit", "okay orbit", "ok orbit", "orbit"));
+                var wakePhrases = new List<string> { "hey orbit", "okay orbit", "ok orbit", "orbit" };
+                foreach (var app in AppCatalog.List().Take(500))
+                    if (!string.IsNullOrWhiteSpace(app.name) && app.name.Length < 80)
+                        wakePhrases.Add("hey orbit open " + app.name);
+                for (int percent = 0; percent <= 100; percent++)
+                {
+                    wakePhrases.Add("hey orbit volume " + percent);
+                    wakePhrases.Add("hey orbit volume " + percent + " percent");
+                    wakePhrases.Add("hey orbit brightness " + percent + " percent");
+                }
+                foreach (var command in new[] { "mute", "unmute", "turn volume up", "turn volume down", "open settings", "open bluetooth settings", "open wifi settings", "open display settings" })
+                    wakePhrases.Add("hey orbit " + command);
+                builder.Append(new Choices(wakePhrases.Distinct().ToArray()));
                 wakeGrammar = new Grammar(builder) { Name = "orbit-wake" };
                 dictationGrammar = new DictationGrammar { Name = "orbit-command" };
                 recognizer.LoadGrammar(wakeGrammar);
@@ -161,6 +173,16 @@ internal sealed class SpeechController : IDisposable
             }
             if (isWake)
             {
+                string command = System.Text.RegularExpressions.Regex.Replace(text, @"^(?:(?:hey|okay|ok)\s+)?orbit\b[ ,:]*", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+                if (command.Length > 0)
+                {
+                    commandDeadline = DateTime.MinValue;
+                    finishDeadline = DateTime.UtcNow.AddSeconds(25);
+                    SetCommandGrammars(false);
+                    if (wakeGrammar is not null) wakeGrammar.Enabled = false;
+                    Report("heard", command);
+                    return;
+                }
                 commandDeadline = DateTime.UtcNow.AddSeconds(25);
                 finishDeadline = DateTime.MinValue;
                 if (wakeGrammar is not null) wakeGrammar.Enabled = false;

@@ -1,5 +1,6 @@
 import { normalizeCommand, parseDesktopCommand, matchApps } from './commands.js';
 let pendingAppChoices = [];
+let speechPlaybackActive = false;
 import { invoke, isTauri, isPermissionGranted, requestPermission, sendNotification, open, openUrl, enableAutostart, disableAutostart, autostartIsEnabled } from './native-bridge.js';
 
 const $ = (id) => document.getElementById(id);
@@ -504,9 +505,9 @@ function speakBrowser(text) {
     if(chosen){utterance.voice=chosen;utterance.lang=chosen.lang;}else utterance.lang='en-US';
     let finished=false;
     const timer=setTimeout(()=>{if(!finished){finished=true;reject(Error('Speech output did not start.'));}},4000);
-    utterance.onstart=()=>{clearTimeout(timer);logAssistant('tts:start','Browser speech started');updateSpeechState('speaking','Reading response');};
-    utterance.onend=()=>{finished=true;clearTimeout(timer);logAssistant('tts:done','Browser speech finished');updateSpeechState(settings.wakeEnabled?'armed':'idle');resolve(true);};
-    utterance.onerror=e=>{finished=true;clearTimeout(timer);logAssistant('tts:error',e.error||'Unknown Web Speech error');reject(Error('Web speech error: '+(e.error||'unknown')));};
+    utterance.onstart=()=>{speechPlaybackActive=true;clearTimeout(timer);logAssistant('tts:start','Browser speech started');updateSpeechState('speaking','Reading response');};
+    utterance.onend=()=>{speechPlaybackActive=false;finished=true;clearTimeout(timer);logAssistant('tts:done','Browser speech finished');updateSpeechState(settings.wakeEnabled?'armed':'idle');resolve(true);};
+    utterance.onerror=e=>{speechPlaybackActive=false;updateSpeechState('error',e.error||'Speech failed');finished=true;clearTimeout(timer);logAssistant('tts:error',e.error||'Unknown Web Speech error');reject(Error('Web speech error: '+(e.error||'unknown')));};
     speechSynthesis.cancel();speechSynthesis.speak(utterance);
   });
 }
@@ -931,6 +932,7 @@ const logAssistant=(stage,message)=>{
 function assistantFeedback(message){ $('assistantFeedback').textContent=message; }
 
 function updateSpeechState(state, message='') {
+  if(speechPlaybackActive && state!=='speaking') return;
   speechState=state;
   document.body.classList.toggle('orbit-listening',state==='listening');
   document.body.classList.toggle('orbit-armed',state==='armed');
@@ -1079,6 +1081,7 @@ $('assistantDiagnosticsFolder').onclick=()=>isTauri()?invoke('assistant_log_fold
 if(globalThis.chrome?.webview){
   chrome.webview.addEventListener('message',({data})=>{
     if(data?.orbitEvent==='tts'){
+      speechPlaybackActive=data.state==='speaking';
       if(data.state==='speaking')updateSpeechState('speaking',data.message||'');
       else if(data.state==='error'){updateSpeechState('error',data.message||'');assistantFeedback(data.message||'Voice output failed');}
       else if(data.state==='idle')updateSpeechState(settings.wakeEnabled?'armed':'idle');
