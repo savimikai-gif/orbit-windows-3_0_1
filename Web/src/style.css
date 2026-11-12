@@ -57,7 +57,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .voice-status.ready{color:#a2e9ca;background:#17372f;border-color:#306c58}
 .voice-preview{min-width:130px}
 @media(max-width:580px){.time-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.time-input-row .small{width:100%}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 /* ORBIT 2.6 — accessible, saved appearance presets */
 :root {
@@ -266,10 +265,6 @@ body {
   #appView .web-link{padding:10px;}
   #appView .quick-web-links{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
-@media(prefers-reduced-motion:reduce){
-  #appView .page:not(.hidden),#appView #page-dashboard>.hero,#appView #page-dashboard>.dashboard-grid,#appView #page-dashboard>.dashboard-card,#appView #page-dashboard>.quick-web-panel,.jarvis-hud g,.jarvis-hud .hud-pulse,#appView .hero:before,#appView .online-dot{animation:none!important;}
-  .orbit27-ripple{display:none!important;}
-}
 
 /* ORBIT 2.8 — Lovable Quick Access Studio inspired UI */
 .ambient-aurora{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -295,7 +290,6 @@ body {
 @media(max-width:1140px){.agenda-layout{grid-template-columns:1fr}.resource-grid{grid-template-columns:1fr}.metric-mini-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.timer-set{grid-template-columns:auto 1fr auto 1fr}.fullscreen-button span{display:none}.fullscreen-button{min-width:40px}}
 @media(max-width:700px){.timer-set{grid-template-columns:auto 80px auto 80px}.timer-pane{padding:12px}.agenda-days{gap:3px}.agenda-day{height:38px}.news-feed{max-height:280px}}
-@media(prefers-reduced-motion:reduce){.ambient-aurora i,.lift-card,#page-dashboard .hero,#page-dashboard .dashboard-grid,#page-dashboard .system-mini-card,#page-dashboard .news-panel,#page-dashboard .quick-web-panel{animation:none!important;transition:none!important}}
 
 /* ORBIT 2.8: user-requested original LEFT sidebar restored (no presets/top-tab row). */
 #appView.app-shell{display:flex;align-items:stretch;min-height:100vh}
@@ -443,7 +437,6 @@ input[type=checkbox]{min-height:0;}
   #appView .section-heading{flex-wrap:wrap;gap:10px;}
   #appView .cloud-panel .pill{white-space:normal;}
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}#appView .panel:hover{transition:none;}}
 /* Keep the long speech settings panel separate from the smaller account panels.
    Unlike two-row CSS grid, independent columns do not leave huge empty card space. */
 #appView #page-settings .settings-columns{
@@ -524,7 +517,6 @@ input[type=checkbox]{min-height:0;}
 #installUpdate:not(.hidden){color:#ecfff5;background:#1c5d49;border-color:#49a285}
 @media(max-width:900px){.hero-copy{max-width:70%}.hero-decoration{width:180px;min-width:180px}.orbit-core-shell{transform:scale(.78);transform-origin:center}.notes-layout{grid-template-columns:minmax(190px,245px) minmax(0,1fr)}.notes-editor{padding:18px}}
 @media(max-width:640px){.hero-copy{max-width:100%}.hero-decoration{display:none}.notes-layout{grid-template-columns:1fr;min-height:0}.notes-sidebar{border-right:0;border-bottom:1px solid #2a3b53}.notes-list{max-height:190px}.notes-editor{min-height:460px}.notes-editor-actions{flex-wrap:wrap}}
-@media(prefers-reduced-motion:reduce){.orbit-core-shell *, .orbit-core-shell *::before,.orbit-core-shell *::after{animation:none!important;transition:none!important}}
 
 /* ORBIT 3.2 — additive motion system; existing ORBIT identity stays intact. */
 :root{--orbit-card-radius:18px;--orbit-input-radius:12px}
@@ -562,7 +554,6 @@ button:hover:not(:disabled){filter:brightness(1.10)}button:active:not(:disabled)
 :root[data-orbit-motion="reduced"] *, :root[data-orbit-motion="reduced"] *::before, :root[data-orbit-motion="reduced"] *::after{animation-duration:.3s;transition-duration:.12s}
 :root[data-orbit-motion="off"] *, :root[data-orbit-motion="off"] *::before, :root[data-orbit-motion="off"] *::after{animation:none;transition:none}
 @media(max-width:850px){.orbit-settings-grid{grid-template-columns:1fr}.orbit-dashboard-widgets{margin-top:8px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms;transition-duration:.01ms;scroll-behavior:auto}}
 
 /* ========================================================================
    ORBIT 3.2.1 — actual installed-app integration of the Designobo motion
@@ -713,7 +704,6 @@ body[data-assistant-status="speaking"] .orbit-glow-layer{filter:blur(16px) brigh
 @media(max-width:550px){#appView .orbit-widget-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#appView .orbit-dashboard-widgets .section-heading{align-items:flex-start;flex-direction:column}#appView .quick-web-links{grid-template-columns:1fr 1fr}}
 :root[data-orbit-motion="reduced"] #appView .orbit-core-shell::before,:root[data-orbit-motion="reduced"] #appView .orbit-core-shell::after{animation-duration:60s}
 :root[data-orbit-motion="off"] #appView .orbit-core-shell::before,:root[data-orbit-motion="off"] #appView .orbit-core-shell::after{animation:none}
-@media(prefers-reduced-motion:reduce){#appView .orbit-core-shell::before,#appView .orbit-core-shell::after,#appView .hero::before{animation:none!important}#appView .orbit-widget{animation:none!important}}
 
 /* The animated assistant is the visual focus, widgets follow underneath. */
 #appView #page-dashboard>.orbit-dashboard-widgets{margin:15px 0!important}
@@ -730,16 +720,15 @@ body.orbit-sidebar-collapsed #appView .nav-btn:is(:hover,:focus-visible)::after 
 :root:not([data-orbit-theme="light"]) #appView { background:radial-gradient(ellipse at 65% 20%,#102d4a 0,#0a1424 42%,#060a13 100%); }
 :root:not([data-orbit-theme="light"]) #appView .panel { background:linear-gradient(136deg,#11263adf,#0b1726eb);border-color:#234158;box-shadow:0 9px 32px #050a1773; }
 :root:not([data-orbit-theme="light"]) #appView .sidebar { background:linear-gradient(180deg,#0a1728ee,#09111ef9); }
-:root:not([data-orbit-theme="light"]) #appView .nav-btn.active { background:linear-gradient(90deg,#184364dd,#12304940);box-shadow:inset 3px 0 #64c9ff;color:#def7ff; }
-:root:not([data-orbit-theme="light"]) #appView .nav-icon,:root:not([data-orbit-theme="light"]) #appView .logo-icon { color:#64c9ff; }
-:root:not([data-orbit-theme="light"]) #appView .primary { background:linear-gradient(130deg,#64c9ff,#76f4e6);color:#071927;border-color:#6fd7ee;box-shadow:0 6px 23px #37bfff26; }
+:root:not([data-orbit-theme="light"]) #appView .nav-btn.active { background:linear-gradient(90deg,#184364dd,#12304940);box-shadow:inset 3px 0 var(--accent);color:#def7ff; }
+:root:not([data-orbit-theme="light"]) #appView .nav-icon,:root:not([data-orbit-theme="light"]) #appView .logo-icon { color:var(--accent); }
+:root:not([data-orbit-theme="light"]) #appView .primary { background:linear-gradient(130deg,var(--accent),color-mix(in srgb,var(--accent) 65%,white));color:#071927;border-color:var(--accent-stroke);box-shadow:0 6px 23px var(--accent-glow); }
 #appView .hero { border-radius:19px; }
-@media(prefers-reduced-motion:reduce){#appView .sidebar {transition:none;}}
 
 /* Motion and spherical core from the Designobo desktop reference. */
 #appView .orbit-core-shell>.jarvis-hud { display:none; }
-#appView .designobo-orb { width:90px;height:90px;position:relative;z-index:3;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e9ffff,#76dfff 20%,#1563a0 58%,#061628 80%);box-shadow:0 0 28px #70caff,0 0 65px #1aa5f860,inset -10px -15px 25px #070e27;animation:designoboBreathe 3.9s ease-in-out infinite; }
-#appView .designobo-arc { position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#6de5f8;border-bottom-color:#4b9cc6;animation:orbit321Spin 17s linear infinite; }
+#appView .designobo-orb { width:90px;height:90px;position:relative;z-index:3;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e9ffff,var(--accent) 20%,var(--accent-deep) 58%,#061628 80%);box-shadow:0 0 28px var(--accent),0 0 65px var(--accent-glow),inset -10px -15px 25px #070e27;animation:designoboBreathe 3.9s ease-in-out infinite; }
+#appView .designobo-arc { position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--accent);border-bottom-color:var(--accent-deep);animation:orbit321Spin 17s linear infinite; }
 #appView .designobo-arc.inner { inset:20px;animation:orbit321Spin 11s linear infinite reverse;opacity:.75; }
 #appView .orbit-core-shell::before { inset:5px;animation-duration:24s; }
 #appView .orbit-core-shell::after { inset:18px;animation-duration:12s; }
@@ -754,5 +743,21 @@ body.orbit-sidebar-collapsed #appView .nav-btn:is(:hover,:focus-visible)::after 
 :root[data-orbit-motion="reduced"] #appView .designobo-arc {animation-duration:60s;}
 :root[data-orbit-motion="reduced"] #appView .designobo-orb,:root[data-orbit-motion="reduced"] #appView #page-dashboard .panel {animation:none;}
 :root[data-orbit-motion="off"] #appView *,:root[data-orbit-motion="off"] #appView *::before,:root[data-orbit-motion="off"] #appView *::after {animation:none!important;transition:none!important;}
-@media(prefers-reduced-motion:reduce){#appView *,#appView *::before,#appView *::after {animation:none!important;transition:none!important;}}
+
+/* Full is an explicit app preference. Reduced and Off stay available in Settings. */
+:root[data-orbit-motion="reduced"] #appView *,
+:root[data-orbit-motion="reduced"] #appView *::before,
+:root[data-orbit-motion="reduced"] #appView *::after { animation:none!important;transition:none!important; }
+@media(prefers-reduced-motion:reduce){
+  :root:not([data-orbit-motion="full"]) *,
+  :root:not([data-orbit-motion="full"]) *::before,
+  :root:not([data-orbit-motion="full"]) *::after {animation:none!important;transition:none!important;}
+}
+/* The input and painted rail share a 32px center line and 18px thumb geometry. */
+#appView .orbit-slider-track {height:32px;}
+#appView .orbit-slider-track .orbit-edge-slider {height:32px;min-height:0;max-height:32px;left:-9px;width:calc(100% + 18px);padding:0;margin:0;transition:none;}
+#appView .orbit-edge-slider::-webkit-slider-runnable-track {height:7px;}
+#appView .orbit-edge-slider::-webkit-slider-thumb {width:18px;height:18px;margin-top:-5.5px;transition:none;}
+#appView .orbit-edge-slider::-moz-range-track {height:7px;}
+#appView .orbit-edge-slider::-moz-range-thumb {width:18px;height:18px;transition:none;}
 
