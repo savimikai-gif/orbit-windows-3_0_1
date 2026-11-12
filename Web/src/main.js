@@ -1,3 +1,5 @@
+import { normalizeCommand, parseDesktopCommand, matchApps } from './commands.js';
+let pendingAppChoices = [];
 import { invoke, isTauri, isPermissionGranted, requestPermission, sendNotification, open, openUrl, enableAutostart, disableAutostart, autostartIsEnabled } from './native-bridge.js';
 
 const $ = (id) => document.getElementById(id);
@@ -940,7 +942,7 @@ function updateSpeechState(state, message='') {
   document.body.classList.toggle('orbit-speaking',state==='speaking');
   document.body.dataset.assistantStatus=state;
 }
-function recognitionLocale(){return settings.speechLanguage==='ro-RO'?'ro-RO':'en-US';}
+function recognitionLocale(){return settings.speechLanguage || 'en-US';}
 async function talk() {
   if (!isTauri()) {toast('Microphone commands require the Windows app.');return;}
   try {await invoke('voice_push_to_talk',{language:recognitionLocale()});updateSpeechState('listening','Speak now');}
@@ -969,7 +971,7 @@ async function handleSpeech(text, fromVoice=false) {
   const original=String(text||'').trim();
   if(!original){assistantFeedback('Enter a command first.');return;}
   const lower=original.toLocaleLowerCase().trim().replace(/[.!?]+$/,'');
-  const clean=lower.replace(/^(?:hey|okay|ok)\s+orbit[,:]?\s*/,'').trim();
+  const clean=normalizeCommand(lower);
   logAssistant(fromVoice?'recognized-text':'typed-input',original);
   updateSpeechState('thinking',original.slice(0,100));
   assistantFeedback('Understanding: “'+original+'”');
@@ -977,13 +979,39 @@ async function handleSpeech(text, fromVoice=false) {
   try {
     if(!clean||/^(?:hey|hi|hello)\s*orbit$/.test(clean)) {respond('I am ready. Say a command or type it below.');return;}
     if(/^(help|commands|what can you do|ajutor|comenzi)$/.test(clean)){
-      respond('Try open calculator, set volume to 30 percent, create a note, show reminders, or show PC performance.');return;
+      respond('Try open Chrome, launch Spotify, turn volume up, set brightness to fifty percent, open Bluetooth settings, create a note, or show reminders.');return;
     }
     if(noteDictation) {
       noteDictation=false;
       if(!noteSelected)await createNote();
       $('noteBody').value+=($('noteBody').value?'\n':'')+original;
       await flushNoteSave();respond('Note saved.');return;
+    }
+    const choiceText = ({one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',seven:'7',eight:'8',nine:'9'})[clean] || clean;
+    const selection = choiceText.match(/^(?:number |option )?([1-9])$/);
+    if (pendingAppChoices.length && selection) {
+      const app = pendingAppChoices[Number(selection[1])-1];
+      if (!app) {respond('Choose a number from the app list.');return;}
+      await invoke('launch_catalog_app',{path:app.path});pendingAppChoices=[];respond('Opening '+app.name+'.');return;
+    }
+    if (clean === 'cancel') {pendingAppChoices=[];respond('Cancelled.');return;}
+    const desktop = parseDesktopCommand(clean);
+    if (desktop?.question) {respond(desktop.question);return;}
+    if (desktop?.command) {
+      const result = await invoke(desktop.command,desktop.args);
+      respond(desktop.command==='settings_open'?'Opening Windows Settings.':desktop.command==='volume_mute'?(desktop.args.enabled?'Audio muted.':'Audio unmuted.'):desktop.command.startsWith('volume')?'Windows volume is '+result+' percent.':'Brightness updated.');return;
+    }
+    // Preserve ORBIT navigation commands before resolving Windows applications.
+    const internalPage = desktop?.app && {notes:'notes',reminders:'reminders',tasks:'reminders',timers:'timers',weather:'weather',dashboard:'dashboard',presets:'presets','system monitor':'system','pc performance':'system'}[desktop.app];
+    if(internalPage){showPage(internalPage);respond('Opening '+desktop.app+'.');return;}
+    if (desktop?.app && !/widget/.test(desktop.app)) {
+      const apps = await invoke('list_installed_apps');
+      const matches = matchApps(desktop.app,apps);
+      if(matches.length===1){await invoke('launch_catalog_app',{path:matches[0].path});pendingAppChoices=[];respond('Opening '+matches[0].name+'.');return;}
+      if(matches.length>1){pendingAppChoices=matches.slice(0,9);respond('Which app? '+pendingAppChoices.map((app,i)=>(i+1)+'. '+app.name).join('; ')+'. Say or type its number, or cancel.');return;}
+      const builtins={calculator:'calculator',calc:'calculator',notepad:'notepad',explorer:'explorer','file explorer':'explorer',files:'explorer'};
+      if(builtins[desktop.app]){await invoke('launch_known_app',{name:builtins[desktop.app]});respond('Opening '+desktop.app+'.');return;}
+      respond('I could not find '+desktop.app+'. Try its installed name, or add its executable through Presets → Browse files.');return;
     }
     // Windows-control commands. Distinct input/processing/response events are logged.
     const volume=clean.match(/(?:set|change|turn|put|make)?\s*(?:the|my|system)?\s*(?:volume|sound)(?:\s+(?:to|at|on))?\s+(\d{1,3})(?:\s*percent|\s*%)?/)
@@ -1060,7 +1088,7 @@ if(globalThis.chrome?.webview){
     if(data.state==='hypothesis'){
       updateSpeechState('hypothesis',data.message||'');return;
     }
-    if(data.state==='rejected'){logAssistant('recognition:rejected',data.message||'');updateSpeechState('listening','Trying to understand…');return;}
+    if(data.state==='rejected'){logAssistant('recognition:rejected',data.message||'');updateSpeechState('listening',data.message||'Please repeat or type the command.');assistantFeedback(data.message||'Please repeat or type the command.');return;}
     if(data.state==='audio_problem'){updateSpeechState('error',data.message||'Audio problem');return;}
     if(data.state==='heard'&&data.message){updateSpeechState('thinking',data.message);void handleSpeech(data.message,true);return;}
     updateSpeechState(data.state||'idle',data.message||'');

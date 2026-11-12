@@ -15,8 +15,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
       - name: Check JavaScript syntax
@@ -24,6 +24,8 @@ jobs:
         run: |
           node --check Web/src/main.js
           node --check Web/src/native-bridge.js
+          node --check Web/src/commands.js
+          node tests/commands.test.mjs
       - name: Publish self-contained ORBIT.exe
         shell: pwsh
         run: |
@@ -45,7 +47,7 @@ jobs:
         run: |
           $hash = (Get-FileHash 'Release/ORBIT_3_2_1_Setup.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -Path 'Release/ORBIT_3_2_1_Setup.exe.sha256' -Value "$hash  ORBIT_3_2_1_Setup.exe" -NoNewline
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: ORBIT-3.2.1-Windows
           path: |
@@ -53,3 +55,4 @@ jobs:
             Release/ORBIT_3_2_1_Setup.exe
             Release/ORBIT_3_2_1_Setup.exe.sha256
           if-no-files-found: error
+

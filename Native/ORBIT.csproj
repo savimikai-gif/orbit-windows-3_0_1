@@ -25,7 +25,9 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
     <EmbeddedResource Include="..\Web\index.html" LogicalName="orbit/index.html" />
     <EmbeddedResource Include="..\Web\src\style.css" LogicalName="orbit/src/style.css" />
+    <EmbeddedResource Include="..\Web\src\commands.js" LogicalName="orbit/src/commands.js" />
     <EmbeddedResource Include="..\Web\src\main.js" LogicalName="orbit/src/main.js" />
     <EmbeddedResource Include="..\Web\src\native-bridge.js" LogicalName="orbit/src/native-bridge.js" />
   </ItemGroup>
 </Project>
+

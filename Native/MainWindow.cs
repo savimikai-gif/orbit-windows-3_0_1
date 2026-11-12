@@ -134,7 +134,7 @@ public sealed class MainWindow : Form
     }
 
     private static readonly string[] WebFiles = [
-        "index.html", "src/style.css", "src/main.js", "src/native-bridge.js"
+        "index.html", "src/style.css", "src/main.js", "src/commands.js", "src/native-bridge.js"
     ];
     private void ExtractWebResources()
     {
@@ -237,7 +237,11 @@ public sealed class MainWindow : Form
             case "open_url": OpenWeb(GetText(args,"url"));return true;
             case "pick_files": return PickFiles(GetBool(args,"multiple"));
             case "launch_app": LaunchApp(GetText(args,"path"));return true;
-            case "list_installed_apps": return await Task.Run(InstalledApps);
+            case "list_installed_apps": return await Task.Run(AppCatalog.List);
+            case "launch_catalog_app": await Task.Run(() => AppCatalog.Launch(GetText(args,"path"))); return true;
+            case "volume_adjust": return await Task.Run(() => WindowsControl.AdjustVolume((int)GetNumber(args,"delta",10)));
+            case "brightness_adjust": return await Task.Run(() => WindowsControl.AdjustBrightness((int)GetNumber(args,"delta",10)));
+            case "settings_open": WindowsControl.OpenSettings(GetText(args,"page")); return true;
             case "set_autostart": SetAutostart(GetBool(args,"enabled"));return true;
             case "get_autostart": return GetAutostart();
             case "set_close_to_tray": closeToTray=GetBool(args,"enabled");return true;
@@ -315,6 +319,7 @@ public sealed class MainWindow : Form
     }
     private static void LaunchApp(string path)
     {
+        if (path.StartsWith("shell:AppsFolder\\", StringComparison.OrdinalIgnoreCase)) { AppCatalog.Launch(path); return; }
         if (!Path.IsPathFullyQualified(path) || !File.Exists(path)) throw new InvalidOperationException("Application path does not exist.");
         if (!new[]{".exe",".lnk"}.Contains(Path.GetExtension(path),StringComparer.OrdinalIgnoreCase))
             throw new InvalidOperationException("Only .exe and .lnk files can be launched.");
@@ -368,3 +373,4 @@ public sealed class MainWindow : Form
     }
 
 }
+

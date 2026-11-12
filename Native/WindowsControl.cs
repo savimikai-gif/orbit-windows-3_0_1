@@ -15,6 +15,25 @@ internal static class WindowsControl
         output.AudioEndpointVolume.MasterVolumeLevelScalar = Math.Clamp(pct, 0, 100) / 100f;
         return (int)Math.Round(output.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
     }
+    internal static int AdjustVolume(int delta)
+    {
+        using var devices = new MMDeviceEnumerator();
+        using var output = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        return SetVolume((int)Math.Round(output.AudioEndpointVolume.MasterVolumeLevelScalar * 100) + delta);
+    }
+    internal static object AdjustBrightness(int delta)
+    {
+        using var search = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM WmiMonitorBrightness WHERE Active = True");
+        foreach (ManagementObject screen in search.Get())
+            using (screen) return SetBrightness(Convert.ToInt32(screen["CurrentBrightness"]) + delta);
+        throw new InvalidOperationException("This monitor does not expose software brightness controls.");
+    }
+    internal static void OpenSettings(string page)
+    {
+        string[] pages = ["", "display", "sound", "bluetooth", "network-wifi", "network", "windowsupdate", "appsfeatures", "privacy-microphone", "privacy-webcam", "personalization", "powersleep", "notifications", "dateandtime", "printers", "mousetouchpad", "keyboard", "easeofaccess", "storagesense", "defaultapps", "accounts"];
+        if (!pages.Contains(page)) throw new InvalidOperationException("Unknown Settings page.");
+        Process.Start(new ProcessStartInfo("ms-settings:" + page) { UseShellExecute = true });
+    }
     internal static bool Mute(bool on)
     {
         using var devices = new MMDeviceEnumerator();
@@ -123,3 +142,4 @@ internal static class WindowsControl
         };
     }
 }
+

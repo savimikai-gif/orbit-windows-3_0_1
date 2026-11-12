@@ -10,6 +10,7 @@ internal sealed class SpeechController : IDisposable
     private SpeechRecognitionEngine? recognizer;
     private Grammar? wakeGrammar;
     private DictationGrammar? dictationGrammar;
+    private Grammar? commandGrammar;
     private readonly System.Threading.Timer expiry;
     private readonly object gate = new();
     private DateTime commandDeadline = DateTime.MinValue;
@@ -39,7 +40,7 @@ internal sealed class SpeechController : IDisposable
             commandDeadline = DateTime.MinValue;
             if (handsFree)
             {
-                if (dictationGrammar is not null) dictationGrammar.Enabled = false;
+                SetCommandGrammars(false);
                 if (wakeGrammar is not null) wakeGrammar.Enabled = true;
                 Report("armed", "No command understood. Say Hey ORBIT or use the text box.");
             }
@@ -68,14 +69,30 @@ internal sealed class SpeechController : IDisposable
             try
             {
                 recognizer = new SpeechRecognitionEngine(info);
+                recognizer.EndSilenceTimeout = TimeSpan.FromMilliseconds(900);
+                recognizer.EndSilenceTimeoutAmbiguous = TimeSpan.FromMilliseconds(1200);
                 var builder = new GrammarBuilder { Culture = info.Culture };
                 builder.Append(new Choices("hey orbit", "okay orbit", "ok orbit", "orbit"));
                 wakeGrammar = new Grammar(builder) { Name = "orbit-wake" };
                 dictationGrammar = new DictationGrammar { Name = "orbit-command" };
                 recognizer.LoadGrammar(wakeGrammar);
                 recognizer.LoadGrammar(dictationGrammar);
+                if (info.Culture.TwoLetterISOLanguageName == "en")
+                {
+                    var phrases = new List<string> { "mute", "unmute", "turn volume up", "turn volume down", "increase brightness", "decrease brightness", "open settings", "open Bluetooth settings", "open wifi settings", "help", "cancel", "one", "two", "three" };
+                    foreach (var app in AppCatalog.List().Take(500))
+                    {
+                        if (string.IsNullOrWhiteSpace(app.name) || app.name.Length > 80) continue;
+                        phrases.Add("open " + app.name);
+                        phrases.Add("launch " + app.name);
+                    }
+                    var commands = new GrammarBuilder { Culture = info.Culture };
+                    commands.Append(new Choices(phrases.Distinct().ToArray()));
+                    commandGrammar = new Grammar(commands) { Name = "orbit-app-commands" };
+                    recognizer.LoadGrammar(commandGrammar);
+                }
                 wakeGrammar.Enabled = wakeEnabled;
-                dictationGrammar.Enabled = !wakeEnabled;
+                SetCommandGrammars(!wakeEnabled);
                 recognizer.SpeechRecognized += OnRecognized;
                 recognizer.SpeechHypothesized += (_, e) =>
                 {
@@ -88,7 +105,7 @@ internal sealed class SpeechController : IDisposable
                 recognizer.SpeechRecognitionRejected += (_, e) =>
                 {
                     if (e.Result is not null)
-                        AssistantDiagnostics.Write("recognition:rejected", $"confidence={e.Result.Confidence:F2} text={e.Result.Text}");
+                        Report("rejected", "Please repeat more clearly, or type the command. Heard: " + e.Result.Text);
                 };
                 recognizer.AudioSignalProblemOccurred += (_, e) =>
                     Report("audio_problem", e.AudioSignalProblem.ToString());
@@ -99,7 +116,7 @@ internal sealed class SpeechController : IDisposable
                 recognizer.SetInputToDefaultAudioDevice();
                 recognizer.RecognizeAsync(RecognizeMode.Multiple);
                 handsFree = wakeEnabled;
-                commandDeadline = wakeEnabled ? DateTime.MinValue : DateTime.UtcNow.AddSeconds(15);
+                commandDeadline = wakeEnabled ? DateTime.MinValue : DateTime.UtcNow.AddSeconds(25);
                 Report(wakeEnabled ? "armed" : "listening", wakeEnabled ? "Say Hey ORBIT" : "Speak a command now");
                 return State();
             }
@@ -111,15 +128,20 @@ internal sealed class SpeechController : IDisposable
             }
         }
     }
+    private void SetCommandGrammars(bool enabled)
+    {
+        if (dictationGrammar is not null) dictationGrammar.Enabled = enabled;
+        if (commandGrammar is not null) commandGrammar.Enabled = enabled;
+    }
     internal void PushToTalk(string language)
     {
         lock (gate)
         {
-            if (recognizer is null) { Start(false, language); return; }
+            if (recognizer is null || !recognizer.RecognizerInfo.Culture.Name.Equals(language, StringComparison.OrdinalIgnoreCase)) { Start(false, language); return; }
             finishDeadline = DateTime.MinValue;
-            commandDeadline = DateTime.UtcNow.AddSeconds(15);
+            commandDeadline = DateTime.UtcNow.AddSeconds(25);
             if (wakeGrammar is not null) wakeGrammar.Enabled = false;
-            if (dictationGrammar is not null) dictationGrammar.Enabled = true;
+            SetCommandGrammars(true);
             Report("listening", "Speak a command now");
         }
     }
@@ -139,10 +161,10 @@ internal sealed class SpeechController : IDisposable
             }
             if (isWake)
             {
-                commandDeadline = DateTime.UtcNow.AddSeconds(15);
+                commandDeadline = DateTime.UtcNow.AddSeconds(25);
                 finishDeadline = DateTime.MinValue;
                 if (wakeGrammar is not null) wakeGrammar.Enabled = false;
-                if (dictationGrammar is not null) dictationGrammar.Enabled = true;
+                SetCommandGrammars(true);
                 Report("listening", "Wake word heard. Give a command.");
                 return;
             }
@@ -153,7 +175,7 @@ internal sealed class SpeechController : IDisposable
             }
             commandDeadline = DateTime.MinValue;
             finishDeadline = DateTime.UtcNow.AddSeconds(25);
-            if (dictationGrammar is not null) dictationGrammar.Enabled = false;
+            SetCommandGrammars(false);
             Report("heard", text);
         }
     }
@@ -167,7 +189,7 @@ internal sealed class SpeechController : IDisposable
         commandDeadline = DateTime.MinValue;
         if (handsFree && recognizer is not null)
         {
-            if (dictationGrammar is not null) dictationGrammar.Enabled = false;
+            SetCommandGrammars(false);
             if (wakeGrammar is not null) wakeGrammar.Enabled = true;
             Report("armed", "Say Hey ORBIT");
         }
@@ -185,6 +207,7 @@ internal sealed class SpeechController : IDisposable
         recognizer = null;
         wakeGrammar = null;
         dictationGrammar = null;
+        commandGrammar = null;
         handsFree = false;
         if (engine is not null)
         {
@@ -194,3 +217,4 @@ internal sealed class SpeechController : IDisposable
     }
     public void Dispose() { expiry.Dispose(); Stop(); }
 }
+
