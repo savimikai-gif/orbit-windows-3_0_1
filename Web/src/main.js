@@ -1002,14 +1002,14 @@ async function handleSpeech(text, fromVoice=false) {
       respond(desktop.command==='settings_open'?'Opening Windows Settings.':desktop.command==='volume_mute'?(desktop.args.enabled?'Audio muted.':'Audio unmuted.'):desktop.command.startsWith('volume')?'Windows volume is '+result+' percent.':'Brightness updated.');return;
     }
     // Preserve ORBIT navigation commands before resolving Windows applications.
-    const internalPage = desktop?.app && {notes:'notes',reminders:'reminders',tasks:'reminders',timers:'timers',weather:'weather',dashboard:'dashboard',presets:'presets','system monitor':'system','pc performance':'system'}[desktop.app];
+    const internalPage = desktop?.app && {notite:'notes',notitele:'notes',mementouri:'reminders',mementourile:'reminders',sarcini:'reminders',sarcinile:'reminders',notes:'notes',reminders:'reminders',tasks:'reminders',timers:'timers',weather:'weather',dashboard:'dashboard',presets:'presets','system monitor':'system','pc performance':'system'}[desktop.app];
     if(internalPage){showPage(internalPage);respond('Opening '+desktop.app+'.');return;}
     if (desktop?.app && !/widget/.test(desktop.app)) {
       const apps = await invoke('list_installed_apps');
       const matches = matchApps(desktop.app,apps);
       if(matches.length===1){await invoke('launch_catalog_app',{path:matches[0].path});pendingAppChoices=[];respond('Opening '+matches[0].name+'.');return;}
       if(matches.length>1){pendingAppChoices=matches.slice(0,9);respond('Which app? '+pendingAppChoices.map((app,i)=>(i+1)+'. '+app.name).join('; ')+'. Say or type its number, or cancel.');return;}
-      const builtins={calculator:'calculator',calc:'calculator',notepad:'notepad',explorer:'explorer','file explorer':'explorer',files:'explorer'};
+      const builtins={calculatorul:'calculator','editorul de text':'notepad',fisierele:'explorer',calculator:'calculator',calc:'calculator',notepad:'notepad',explorer:'explorer','file explorer':'explorer',files:'explorer'};
       if(builtins[desktop.app]){await invoke('launch_known_app',{name:builtins[desktop.app]});respond('Opening '+desktop.app+'.');return;}
       respond('I could not find '+desktop.app+'. Try its installed name, or add its executable through Presets → Browse files.');return;
     }

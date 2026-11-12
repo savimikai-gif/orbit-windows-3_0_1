@@ -48,7 +48,11 @@ internal static class AppCatalog
                     itemsObject = ((dynamic)folderObject).Items();
                     foreach (dynamic item in (dynamic)itemsObject)
                     {
-                        try { apps.Add(new((string)item.Name, "shell:AppsFolder\\" + (string)item.Path)); }
+                        try
+                        {
+                            string target = (string)item.Path;
+                            apps.Add(new((string)item.Name, File.Exists(target) ? target : "shell:AppsFolder\\" + target));
+                        }
                         finally { Marshal.ReleaseComObject(item); }
                     }
                 }
@@ -70,4 +74,5 @@ internal static class AppCatalog
         Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
     }
 }
+
 
