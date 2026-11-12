@@ -717,3 +717,22 @@ body[data-assistant-status="speaking"] .orbit-glow-layer{filter:blur(16px) brigh
 
 /* The animated assistant is the visual focus, widgets follow underneath. */
 #appView #page-dashboard>.orbit-dashboard-widgets{margin:15px 0!important}
+
+/* Designobo desktop palette and compact navigation. */
+#appView .sidebar { transition:width .28s ease,min-width .28s ease,flex-basis .28s ease; }
+body.orbit-sidebar-collapsed #appView .sidebar { width:78px;min-width:78px;flex:0 0 78px;padding-left:8px;padding-right:8px;overflow:visible; }
+body.orbit-sidebar-collapsed #appView .sidebar .logo { justify-content:center;padding-left:0;padding-right:0; }
+body.orbit-sidebar-collapsed #appView .sidebar .logo>div { display:none; }
+body.orbit-sidebar-collapsed #appView .nav-btn { justify-content:center;gap:0;padding:12px 8px; }
+body.orbit-sidebar-collapsed #appView .nav-btn .nav-icon { flex:0 0 22px; }
+body.orbit-sidebar-collapsed #appView .orbit-sidebar-collapse { margin:16px 0 0;min-height:44px; }
+body.orbit-sidebar-collapsed #appView .nav-btn:is(:hover,:focus-visible)::after { content:attr(data-tooltip);position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);z-index:100;padding:9px 12px;border:1px solid #29455f;border-radius:8px;background:#101b2b;color:#e9f4ff;white-space:nowrap;font-size:13px;box-shadow:0 8px 24px #01040b99;pointer-events:none; }
+:root:not([data-orbit-theme="light"]) #appView { background:radial-gradient(ellipse at 65% 20%,#102d4a 0,#0a1424 42%,#060a13 100%); }
+:root:not([data-orbit-theme="light"]) #appView .panel { background:linear-gradient(136deg,#11263adf,#0b1726eb);border-color:#234158;box-shadow:0 9px 32px #050a1773; }
+:root:not([data-orbit-theme="light"]) #appView .sidebar { background:linear-gradient(180deg,#0a1728ee,#09111ef9); }
+:root:not([data-orbit-theme="light"]) #appView .nav-btn.active { background:linear-gradient(90deg,#184364dd,#12304940);box-shadow:inset 3px 0 #64c9ff;color:#def7ff; }
+:root:not([data-orbit-theme="light"]) #appView .nav-icon,:root:not([data-orbit-theme="light"]) #appView .logo-icon { color:#64c9ff; }
+:root:not([data-orbit-theme="light"]) #appView .primary { background:linear-gradient(130deg,#64c9ff,#76f4e6);color:#071927;border-color:#6fd7ee;box-shadow:0 6px 23px #37bfff26; }
+#appView .hero { border-radius:19px; }
+@media(prefers-reduced-motion:reduce){#appView .sidebar {transition:none;}}
+

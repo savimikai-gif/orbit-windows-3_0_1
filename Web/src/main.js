@@ -1209,8 +1209,25 @@ function wireOrbit32UI(){
     settings.orbitHiddenWidgets=settings.orbitHiddenWidgets.filter(x=>x!==type);
     saveSettings();renderOrbitWidgets();
   };
-  $('sidebarCollapse').onclick=()=>{document.body.classList.toggle('orbit-sidebar-collapsed');settings.orbitSidebarCollapsed=document.body.classList.contains('orbit-sidebar-collapsed');saveSettings();};
-  document.body.classList.toggle('orbit-sidebar-collapsed',!!settings.orbitSidebarCollapsed);
+  const updateSidebar = () => {
+    const collapsed = !!settings.orbitSidebarCollapsed;
+    document.body.classList.toggle('orbit-sidebar-collapsed', collapsed);
+    $('sidebarCollapse').setAttribute('aria-expanded', String(!collapsed));
+    $('sidebarCollapse').setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    $('sidebarCollapse').title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    document.querySelectorAll('.side-nav .nav-btn').forEach(button => {
+      const label = button.querySelector('[data-i18n]').textContent.trim();
+      button.setAttribute('aria-label', label);
+      button.title = label;
+      button.dataset.tooltip = label;
+    });
+  };
+  $('sidebarCollapse').onclick = () => {
+    settings.orbitSidebarCollapsed = !settings.orbitSidebarCollapsed;
+    updateSidebar();
+    saveSettings();
+  };
+  updateSidebar();
   window.addEventListener('keydown',event=>{
     if(event.ctrlKey && event.key.toLowerCase()==='k'){event.preventDefault();openOrbitPalette();}
     if(event.key==='Escape')closeOrbitPalette();
@@ -1291,3 +1308,4 @@ function renderOrbitWidgets(){
 window.addEventListener('pagehide',()=>{if(orbitStateDirty)flushOrbitState();});
 
 bootstrapOrbit32().then(init).catch(error=>{console.error('ORBIT startup:',error);toast(String(error));init();});
+
