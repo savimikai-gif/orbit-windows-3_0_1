@@ -1,3 +1,4 @@
+import { initializeOrb } from './orb.js';
 import { normalizeCommand, parseDesktopCommand, matchApps } from './commands.js';
 let pendingAppChoices = [];
 let speechPlaybackActive = false;
@@ -246,7 +247,7 @@ function applyLanguage() {
   $('languageSelect').value = settings.language;
   applyAppearance();
   $('topLanguage').textContent = settings.language === 'en' ? 'RO' : 'EN';
-  document.title = 'ORBIT 3.2.1';
+  document.title = 'ORBIT Alpha 1.0';
   renderReminderCalendar();
   renderVoiceEngine();
   renderQuickWeb();
@@ -1339,4 +1340,6 @@ function renderOrbitWidgets(){
 window.addEventListener('pagehide',()=>{if(orbitStateDirty)flushOrbitState();});
 
 bootstrapOrbit32().then(init).catch(error=>{console.error('ORBIT startup:',error);toast(String(error));init();});
+
+initializeOrb();
 

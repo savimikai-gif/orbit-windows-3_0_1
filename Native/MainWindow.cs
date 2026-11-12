@@ -12,7 +12,7 @@ public sealed class MainWindow : Form
 {
     private const string HostOrigin = "https://orbit.local/";
     private readonly WebView2 browser = new() { Dock = DockStyle.Fill };
-    private readonly NotifyIcon tray = new() { Icon = System.Drawing.SystemIcons.Application, Text = "ORBIT 3.2.1", Visible = true };
+    private readonly NotifyIcon tray = new() { Icon = System.Drawing.SystemIcons.Application, Text = "ORBIT Alpha 1.0", Visible = true };
     private readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(16) };
     private readonly SpeechController voice = new();
     private readonly VoiceOutput voiceOutput = new();
@@ -33,7 +33,7 @@ public sealed class MainWindow : Form
 
     public MainWindow()
     {
-        Text = "ORBIT 3.2.1";
+        Text = "ORBIT Alpha 1.0";
         Size = new System.Drawing.Size(1360, 860);
         MinimumSize = new System.Drawing.Size(790, 550);
         StartPosition = FormStartPosition.CenterScreen;
@@ -115,6 +115,7 @@ public sealed class MainWindow : Form
 
     private void OnOutputStatus(string state, string message)
     {
+        voice.SetPlayback(state == "speaking");
         AssistantDiagnostics.Write("output:" + state, message);
         if (IsDisposed || !IsHandleCreated) return;
         try
@@ -134,7 +135,7 @@ public sealed class MainWindow : Form
     }
 
     private static readonly string[] WebFiles = [
-        "index.html", "src/style.css", "src/main.js", "src/commands.js", "src/native-bridge.js"
+        "index.html", "src/style.css", "src/main.js", "src/commands.js", "src/orb.js", "src/native-bridge.js"
     ];
     private void ExtractWebResources()
     {
@@ -277,8 +278,10 @@ public sealed class MainWindow : Form
             case "voice_command_complete": await Task.Run(voice.CommandComplete); return true;
             case "tts_list": return await Task.Run(voiceOutput.ListVoices);
             case "tts_speak":
-                await Task.Run(() => voiceOutput.Speak(GetText(args,"text"), GetText(args,"locale","en-US"),
-                    (int)GetNumber(args,"volume",35), GetNumber(args,"rate",0.92), GetText(args,"voice")));
+                voice.SetPlayback(true);
+                try { await Task.Run(() => voiceOutput.Speak(GetText(args,"text"), GetText(args,"locale","en-US"),
+                    (int)GetNumber(args,"volume",35), GetNumber(args,"rate",0.92), GetText(args,"voice"))); }
+                catch { voice.SetPlayback(false); throw; }
                 return true;
             case "tts_stop": await Task.Run(voiceOutput.Cancel); return true;
             case "assistant_log": AssistantDiagnostics.Write(GetText(args,"stage","ui"),GetText(args,"message")); return true;

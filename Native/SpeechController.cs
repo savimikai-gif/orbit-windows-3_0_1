@@ -17,6 +17,7 @@ internal sealed class SpeechController : IDisposable
     private DateTime finishDeadline = DateTime.MinValue;
     private DateTime lastHypothesis = DateTime.MinValue;
     private bool handsFree;
+    private bool playbackActive;
     public event Action<string, string>? StatusChanged;
 
     public SpeechController() => expiry = new System.Threading.Timer(_ => Expire(), null, 600, 600);
@@ -30,6 +31,7 @@ internal sealed class SpeechController : IDisposable
     {
         lock (gate)
         {
+            if (playbackActive) return;
             if (finishDeadline != DateTime.MinValue && DateTime.UtcNow >= finishDeadline)
             {
                 AssistantDiagnostics.Write("recognition:timeout", "Command completion acknowledgement not received; rearming wake word");
@@ -72,7 +74,7 @@ internal sealed class SpeechController : IDisposable
                 recognizer.EndSilenceTimeout = TimeSpan.FromMilliseconds(900);
                 recognizer.EndSilenceTimeoutAmbiguous = TimeSpan.FromMilliseconds(1200);
                 var builder = new GrammarBuilder { Culture = info.Culture };
-                var wakePhrases = new List<string> { "hey orbit", "okay orbit", "ok orbit", "orbit" };
+                var wakePhrases = new List<string> { "hey orbit" };
                 foreach (var app in AppCatalog.List().Take(500))
                     if (!string.IsNullOrWhiteSpace(app.name) && app.name.Length < 80)
                         wakePhrases.Add("hey orbit open " + app.name);
@@ -108,7 +110,7 @@ internal sealed class SpeechController : IDisposable
                 recognizer.SpeechRecognized += OnRecognized;
                 recognizer.SpeechHypothesized += (_, e) =>
                 {
-                    if (DateTime.UtcNow - lastHypothesis > TimeSpan.FromMilliseconds(550))
+                    if (!playbackActive && commandDeadline != DateTime.MinValue && DateTime.UtcNow - lastHypothesis > TimeSpan.FromMilliseconds(550))
                     {
                         lastHypothesis = DateTime.UtcNow;
                         Report("hypothesis", e.Result.Text);
@@ -116,7 +118,7 @@ internal sealed class SpeechController : IDisposable
                 };
                 recognizer.SpeechRecognitionRejected += (_, e) =>
                 {
-                    if (e.Result is not null)
+                    if (!playbackActive && commandDeadline != DateTime.MinValue && e.Result is not null)
                         Report("rejected", "Please repeat more clearly, or type the command. Heard: " + e.Result.Text);
                 };
                 recognizer.AudioSignalProblemOccurred += (_, e) =>
@@ -165,10 +167,11 @@ internal sealed class SpeechController : IDisposable
         AssistantDiagnostics.Write("recognition:result", $"grammar={e.Result.Grammar?.Name}; confidence={confidence:F2}; text={text}");
         lock (gate)
         {
+            if (playbackActive) return;
             bool isWake = e.Result.Grammar?.Name == "orbit-wake";
-            if (confidence < (isWake ? 0.32f : 0.34f))
+            if (confidence < (isWake ? 0.72f : 0.34f) || (isWake && !text.StartsWith("hey orbit", StringComparison.OrdinalIgnoreCase)))
             {
-                Report("rejected", $"Low confidence ({confidence:F2}): {text}");
+                if (!isWake) Report("rejected", $"Low confidence ({confidence:F2}): {text}");
                 return;
             }
             if (isWake)
@@ -183,7 +186,7 @@ internal sealed class SpeechController : IDisposable
                     Report("heard", command);
                     return;
                 }
-                commandDeadline = DateTime.UtcNow.AddSeconds(25);
+                commandDeadline = DateTime.UtcNow.AddSeconds(8);
                 finishDeadline = DateTime.MinValue;
                 if (wakeGrammar is not null) wakeGrammar.Enabled = false;
                 SetCommandGrammars(true);
@@ -201,12 +204,26 @@ internal sealed class SpeechController : IDisposable
             Report("heard", text);
         }
     }
+    internal void SetPlayback(bool active)
+    {
+        lock (gate)
+        {
+            playbackActive = active;
+            if (active)
+            {
+                SetCommandGrammars(false);
+                if (wakeGrammar is not null) wakeGrammar.Enabled = false;
+            }
+            else if (recognizer is not null) CommandCompleteInternal();
+        }
+    }
     internal void CommandComplete()
     {
         lock (gate) CommandCompleteInternal();
     }
     private void CommandCompleteInternal()
     {
+        if (playbackActive) return;
         finishDeadline = DateTime.MinValue;
         commandDeadline = DateTime.MinValue;
         if (handsFree && recognizer is not null)

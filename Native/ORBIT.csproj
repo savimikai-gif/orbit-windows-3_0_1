@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>ORBIT</AssemblyName>
     <RootNamespace>ORBIT</RootNamespace>
-    <Version>3.2.1</Version>
-    <FileVersion>3.2.1.0</FileVersion>
+    <Version>1.0.0-alpha.1</Version>
+    <FileVersion>1.0.0.0</FileVersion>
     <ApplicationIcon>..\Assets\icon.ico</ApplicationIcon>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
@@ -25,6 +25,7 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
     <EmbeddedResource Include="..\Web\index.html" LogicalName="orbit/index.html" />
     <EmbeddedResource Include="..\Web\src\style.css" LogicalName="orbit/src/style.css" />
+    <EmbeddedResource Include="..\Web\src\orb.js" LogicalName="orbit/src/orb.js" />
     <EmbeddedResource Include="..\Web\src\commands.js" LogicalName="orbit/src/commands.js" />
     <EmbeddedResource Include="..\Web\src\main.js" LogicalName="orbit/src/main.js" />
     <EmbeddedResource Include="..\Web\src\native-bridge.js" LogicalName="orbit/src/native-bridge.js" />

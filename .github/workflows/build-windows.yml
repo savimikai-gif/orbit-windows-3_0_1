@@ -1,4 +1,4 @@
-name: Build ORBIT 3.2.1 for Windows
+name: Build ORBIT Alpha 1.0 for Windows
 on:
   workflow_dispatch:
   push:
@@ -45,14 +45,14 @@ jobs:
       - name: Create checksum for updater
         shell: pwsh
         run: |
-          $hash = (Get-FileHash 'Release/ORBIT_3_2_1_Setup.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
-          Set-Content -Path 'Release/ORBIT_3_2_1_Setup.exe.sha256' -Value "$hash  ORBIT_3_2_1_Setup.exe" -NoNewline
+          $hash = (Get-FileHash 'Release/ORBIT_Alpha_1_0_Setup.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -Path 'Release/ORBIT_Alpha_1_0_Setup.exe.sha256' -Value "$hash  ORBIT_Alpha_1_0_Setup.exe" -NoNewline
       - uses: actions/upload-artifact@v6
         with:
-          name: ORBIT-3.2.1-Windows
+          name: ORBIT-Alpha-1.0-Windows
           path: |
             Publish/ORBIT.exe
-            Release/ORBIT_3_2_1_Setup.exe
-            Release/ORBIT_3_2_1_Setup.exe.sha256
+            Release/ORBIT_Alpha_1_0_Setup.exe
+            Release/ORBIT_Alpha_1_0_Setup.exe.sha256
           if-no-files-found: error
 

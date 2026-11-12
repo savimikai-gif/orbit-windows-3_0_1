@@ -85,6 +85,24 @@ internal static class WindowsControl
     private static DateTime prevNetworkAt = DateTime.MinValue;
     private static bool sampled;
     private static readonly object metricsGate = new();
+    private static double? GpuUsage()
+    {
+        try
+        {
+            using var query = new ManagementObjectSearcher("SELECT Name, UtilizationPercentage FROM Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine");
+            var engines = new Dictionary<string, double>();
+            foreach (ManagementObject item in query.Get())
+            using (item)
+            {
+                string name = item["Name"]?.ToString() ?? "";
+                string engine = System.Text.RegularExpressions.Regex.Replace(name, @"^pid_\d+_", "");
+                engines[engine] = engines.GetValueOrDefault(engine) + Convert.ToDouble(item["UtilizationPercentage"]);
+            }
+            return engines.Count == 0 ? null : Math.Round(Math.Clamp(engines.Values.Max(), 0, 100), 1);
+        }
+        catch (ManagementException) { return null; }
+        catch (UnauthorizedAccessException) { return null; }
+    }
     internal static object Snapshot()
     {
         lock (metricsGate) return SnapshotLocked();
@@ -136,7 +154,7 @@ internal static class WindowsControl
         }
         catch (Exception ex) { AssistantDiagnostics.Write("monitor:network", ex.Message); }
         return new {
-            cpu, ram = Math.Round(mem.MemoryLoad * 1.0, 1), gpu = (double?)null,
+            cpu, ram = Math.Round(mem.MemoryLoad * 1.0, 1), gpu = GpuUsage(),
             disk, networkDownKBps = netDown, networkUpKBps = netUp,
             memoryTotalGb = totalGb, memoryUsedGb = usedGb
         };

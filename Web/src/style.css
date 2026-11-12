@@ -765,4 +765,33 @@ body.orbit-sidebar-collapsed #appView .nav-btn:is(:hover,:focus-visible)::after 
 body.orbit-speaking #appView .designobo-orb {animation:orbitSpeakingPulse .8s ease-in-out infinite;}
 body.orbit-speaking #appView .designobo-arc.outer {animation-duration:5s;}
 @keyframes orbitSpeakingPulse {0%,100%{transform:scale(1);filter:brightness(1.1)}50%{transform:scale(1.16);filter:brightness(1.5)}}
+/* Alpha 1.0 appearance rules. */
+body.orbit-sidebar-collapsed #appView .side-caption {display:none;}
+:root[data-surface="classic"] #appView .panel {background:#142238;backdrop-filter:none;box-shadow:0 8px 20px #0002;}
+:root[data-surface="glass"] #appView .panel {background:linear-gradient(125deg,#284b6b60,#122e474d);backdrop-filter:blur(22px) saturate(135%);border-color:#88c5ef35;box-shadow:inset 0 1px #ffffff18,0 12px 32px #0002;}
+:root[data-surface="flat"] #appView .panel {background:#111e30;backdrop-filter:none;box-shadow:none;border-radius:10px;border-color:#2d4058;}
+:root[data-orbit-theme="light"] #appView {--text:#183247;--muted:#455e72;--line:#aebfce;background:radial-gradient(ellipse at 72% 22%,#c8d8e8,#dce4ec 68%);color:#183247;}
+:root[data-orbit-theme="light"] #appView .sidebar {background:#d7e1eb;border-color:#b4c3d1;}
+:root[data-orbit-theme="light"] #appView :is(.small,.muted,.sub,.checkbox-label,.stack>label,.voice-caption,.side-caption,.sidebar-bottom,.sidebar-bottom small,.breadcrumb span,.settings-column label) {color:#465d72;}
+:root[data-orbit-theme="light"] #appView :is(button,.outline-sm,.orbit-sidebar-collapse,.pill) {color:#203d55;background:#e1e9f1;border-color:#9aafc3;box-shadow:none;}
+:root[data-orbit-theme="light"] #appView button:hover {background:#cbdcea;}
+:root[data-orbit-theme="light"] #appView .primary {background:#195f91;color:#fff;border-color:#195f91;}
+:root[data-orbit-theme="light"] #appView .danger {color:#962d3c;}
+:root[data-orbit-theme="light"] #appView :is(.orbit-voice-settings,.assistant-feedback,.assistant-log,.orbit-widget,.system-mini-card,.web-link,.notes-sidebar,.notes-editor,.time-control,.timer-pane) {background:#dce6ef;color:#20394e;border-color:#aabed0;}
+:root[data-orbit-theme="light"] #appView :is(h2,h3,.diagnostics-actions strong,.orbit-widget strong,.orbit-widget-value,.voice-caption) {color:#20394e;}
+:root[data-orbit-theme="light"] #appView :is(input,select,textarea) {background:#edf2f6;color:#19364d;border-color:#a6b9ca;}
+:root[data-orbit-theme="light"] #appView input::placeholder {color:#526a7e;}
+:root[data-orbit-theme="light"][data-surface="classic"] #appView .panel {background:#e9eff4;border-color:#b7c7d4;box-shadow:0 5px 15px #28466114;}
+:root[data-orbit-theme="light"][data-surface="glass"] #appView .panel {background:linear-gradient(125deg,#f3f7fb80,#d8e5ef60);border-color:#fff9;box-shadow:inset 0 1px #fff8,0 8px 24px #2846611a;backdrop-filter:blur(22px) saturate(120%);}
+:root[data-orbit-theme="light"][data-surface="flat"] #appView .panel {background:#e4ebf1;border-color:#bccad7;box-shadow:none;backdrop-filter:none;}
+#appView .orbit-core-shell {width:280px;height:280px;transform:none;}
+#appView .orbit-core-shell>*:not(.alpha-orb),#appView .orbit-core-shell::before,#appView .orbit-core-shell::after {display:none;}
+#appView .alpha-orb {width:280px;height:280px;display:block;}
+#appView .hero-decoration {width:280px;min-width:280px;right:10px;}
+#appView .hero-copy {max-width:calc(100% - 290px);}
+@media(max-width:1000px){#appView .hero {flex-direction:column;gap:16px;}#appView .hero-copy {max-width:100%;}#appView .hero-decoration {display:block;position:relative;inset:auto;transform:none;flex:0 0 auto;margin:auto;}}
+body.orbit-sidebar-collapsed #appView .sidebar-bottom {display:none;}
+:root[data-orbit-theme="light"] #appView .nav-btn {background:transparent;border-color:transparent;color:#29465d;}
+:root[data-orbit-theme="light"] #appView .nav-btn.active {background:#c4d9e8;border-color:#8daac1;color:#17344b;}
+:root[data-orbit-theme="light"] #appView :is(.breadcrumb,.clock,.text-btn,.link,.nav-icon,.logo-icon) {color:color-mix(in srgb,var(--accent) 40%,#132f44);}
 
