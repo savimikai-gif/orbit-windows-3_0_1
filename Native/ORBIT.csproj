@@ -12,7 +12,7 @@
     <ApplicationIcon>..\Assets\icon.ico</ApplicationIcon>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
+    <PublishSingleFile>false</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>none</DebugType>
@@ -33,4 +33,5 @@
     <EmbeddedResource Include="..\Web\src\native-bridge.js" LogicalName="orbit/src/native-bridge.js" />
   </ItemGroup>
 </Project>
+
 

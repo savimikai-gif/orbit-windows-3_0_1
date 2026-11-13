@@ -29,7 +29,7 @@ jobs:
       - name: Publish self-contained ORBIT.exe
         shell: pwsh
         run: |
-          dotnet publish Native/ORBIT.csproj -c Release -r win-x64 --self-contained true -o Publish -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
+          dotnet publish Native/ORBIT.csproj -c Release -r win-x64 --self-contained true -o Publish -p:PublishSingleFile=false -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
           if (!(Test-Path 'Publish/ORBIT.exe')) { throw 'ORBIT.exe was not created.' }
       - name: Bundle local speech models
         shell: pwsh
@@ -61,4 +61,5 @@ jobs:
             Release/ORBIT_Alpha_1_0_Setup.exe
             Release/ORBIT_Alpha_1_0_Setup.exe.sha256
           if-no-files-found: error
+
 
