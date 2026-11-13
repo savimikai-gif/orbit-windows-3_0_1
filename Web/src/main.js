@@ -82,7 +82,7 @@ i18n.ro.quickTimePast = 'Ora a trecut astăzi. Am mutat pe mâine.';
 i18n.en.voiceNote = 'Local speech. Romanian uses the bundled voice; English uses your installed Windows voice.';
 i18n.ro.voiceNote = 'Vorbire locală. Vocea românească este inclusă; pentru engleză se folosește vocea instalată în Windows.';
 i18n.en.voiceEngine = 'Speech engine'; i18n.ro.voiceEngine = 'Motor vocal';
-i18n.en.systemEngine = 'Windows voice (built in)'; i18n.ro.systemEngine = 'Vocea Windows (integrată)';
+i18n.en.systemEngine = 'Local speech output'; i18n.ro.systemEngine = 'Vorbire locală';
 i18n.ro.today = 'Astăzi'; i18n.ro.tomorrow = 'Mâine'; i18n.ro.nextWeek = 'Peste o săptămână'; i18n.ro.time = 'Ora';
 i18n.en.neuralError = 'Neural voice error: '; i18n.ro.neuralError = 'Eroare voce neurală: ';
 Object.assign(i18n.en, {
@@ -117,8 +117,8 @@ Object.assign(i18n.ro, {
   systemFailed:'Nu s-a putut citi utilizarea sistemului.', gpuNote:'GPU folosește contoarele Windows, dacă sunt disponibile. Valorile pot diferi de Task Manager.',
 });
 // Version 3.0 voice and migration labels (English/Romanian).
-Object.assign(i18n.en,{voiceListLoading:'Loading installed Windows voices…',offlineReady:'Installed Windows voice is available.',windowsLanguageMissing:'A matching Windows voice is not installed.',romanianVoiceMissing:'Install Romanian speech in Windows to use Romanian voice.',importBackup:'Import old backup',importConfirm:'Replace current local reminders and presets with this backup? Export your current data first.',importDone:'Backup imported successfully.'});
-Object.assign(i18n.ro,{voiceListLoading:'Se încarcă vocile Windows…',offlineReady:'Vocea Windows instalată este disponibilă.',windowsLanguageMissing:'Nu există voce Windows pentru limba selectată.',romanianVoiceMissing:'Instalează o voce română în Windows.',importBackup:'Importă backup vechi',importConfirm:'Înlocuiești mementourile și profilurile locale actuale? Exportă-le înainte.',importDone:'Backup importat cu succes.'});
+Object.assign(i18n.en,{voiceListLoading:'Loading installed Windows voices…',offlineReady:'Local speech output is available.',windowsLanguageMissing:'A matching Windows voice is not installed.',romanianVoiceMissing:'Reinstall the full ORBIT speech pack to restore the Romanian voice.',importBackup:'Import old backup',importConfirm:'Replace current local reminders and presets with this backup? Export your current data first.',importDone:'Backup imported successfully.'});
+Object.assign(i18n.ro,{voiceListLoading:'Se încarcă vocile Windows…',offlineReady:'Vorbirea locală este disponibilă.',windowsLanguageMissing:'Nu există voce Windows pentru limba selectată.',romanianVoiceMissing:'Reinstalează pachetul vocal ORBIT pentru a restaura vocea românească.',importBackup:'Importă backup vechi',importConfirm:'Înlocuiești mementourile și profilurile locale actuale? Exportă-le înainte.',importDone:'Backup importat cu succes.'});
 Object.assign(i18n.en,{voiceNote30:'Windows voices work offline. Romanian needs a Romanian speech voice installed in Windows. Voice pitch adjustment applies to browser voices; native voices use their default pitch.'});
 Object.assign(i18n.ro,{voiceNote30:'Vocile Windows funcționează offline. Pentru română este necesară o voce instalată în Windows. Modificarea tonalității se aplică vocilor din browser.'});
 const t = (key) => (i18n[settings.language] || i18n.en)[key] ?? i18n.en[key] ?? key;

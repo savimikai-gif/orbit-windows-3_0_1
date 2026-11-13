@@ -69,7 +69,7 @@ internal sealed class SpeechController : IDisposable
             lock(gate)
             {
                 if(disposed||version!=generation||playback||text.Length==0)return;
-                var wake=Regex.Match(text,@"^\s*(?:hey|hei|hey,)\s+orbit\b[\s,:.!-]*(.*)$",RegexOptions.IgnoreCase);
+                var wake=Regex.Match(text,@"^\s*(?:hey|hei)[,\s]+orbit\b[\s,:.!-]*(.*)$",RegexOptions.IgnoreCase);
                 bool awake=DateTime.UtcNow<=commandUntil;
                 if(handsFree&&!awake&&!wake.Success)return;
                 if(wake.Success)text=wake.Groups[1].Value.Trim();
@@ -90,4 +90,5 @@ internal sealed class SpeechController : IDisposable
     internal void Stop(){lock(gate){StopInternal();Report("off","Microphone off");}}
     public void Dispose(){lock(gate){disposed=true;StopInternal();}processing.Wait();try{factory?.Dispose();audio.Dispose();}finally{processing.Release();}}
 }
+
 
