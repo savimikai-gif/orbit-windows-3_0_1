@@ -22,6 +22,8 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.13" />
     <PackageReference Include="System.Speech" Version="10.0.14" />
     <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="Whisper.net" Version="1.9.1" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <EmbeddedResource Include="..\Web\index.html" LogicalName="orbit/index.html" />
     <EmbeddedResource Include="..\Web\src\style.css" LogicalName="orbit/src/style.css" />

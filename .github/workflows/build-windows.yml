@@ -31,6 +31,12 @@ jobs:
         run: |
           dotnet publish Native/ORBIT.csproj -c Release -r win-x64 --self-contained true -o Publish -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
           if (!(Test-Path 'Publish/ORBIT.exe')) { throw 'ORBIT.exe was not created.' }
+      - name: Bundle local speech models
+        shell: pwsh
+        run: ./scripts/prepare-speech.ps1
+      - name: Verify local Romanian speech round trip
+        shell: pwsh
+        run: dotnet run --project tests/SpeechSmoke -- Publish/Speech
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup --yes --no-progress
@@ -51,7 +57,7 @@ jobs:
         with:
           name: ORBIT-Alpha-1.0-Windows
           path: |
-            Publish/ORBIT.exe
+            Publish/**
             Release/ORBIT_Alpha_1_0_Setup.exe
             Release/ORBIT_Alpha_1_0_Setup.exe.sha256
           if-no-files-found: error

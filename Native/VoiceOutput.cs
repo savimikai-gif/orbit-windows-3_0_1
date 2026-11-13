@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Text;
+using NAudio.Wave;
 using System.Globalization;
 using System.Speech.Synthesis;
 
@@ -9,6 +12,7 @@ internal sealed class VoiceOutput : IDisposable
     private readonly object gate = new();
     private SpeechSynthesizer? synth;
     private Prompt? current;
+    private CancellationTokenSource? localSpeech;
     internal event Action<string, string>? StatusChanged;
 
     internal object ListVoices()
@@ -19,6 +23,7 @@ internal sealed class VoiceOutput : IDisposable
             return synth!.GetInstalledVoices()
                 .Where(v => v.Enabled)
                 .Select(v => new { name = v.VoiceInfo.Name, language = v.VoiceInfo.Culture.Name })
+                .Append(new { name = "ORBIT Romanian (local)", language = "ro-RO" })
                 .ToArray();
         }
     }
@@ -43,8 +48,14 @@ internal sealed class VoiceOutput : IDisposable
     internal void Speak(string text, string locale, int volume, double rate, string selectedVoice = "")
     {
         if (string.IsNullOrWhiteSpace(text)) return;
+        if (locale.StartsWith("ro", StringComparison.OrdinalIgnoreCase))
+        {
+            lock(gate) { Cancel(); localSpeech=new CancellationTokenSource(); _=SpeakRomanian(text,volume,rate,localSpeech.Token); }
+            return;
+        }
         lock (gate)
         {
+            localSpeech?.Cancel();
             EnsureSynth();
             var candidates = synth!.GetInstalledVoices().Where(v => v.Enabled).Select(v => v.VoiceInfo).ToArray();
             VoiceInfo? voice = null;
@@ -78,13 +89,40 @@ internal sealed class VoiceOutput : IDisposable
             }
         }
     }
+    private async Task SpeakRomanian(string text,int volume,double rate,CancellationToken token)
+    {
+        string wav=Path.Combine(Path.GetTempPath(),"orbit-"+Guid.NewGuid()+".wav");
+        try
+        {
+            string folder=Path.Combine(AppContext.BaseDirectory,"Speech");
+            var start=new ProcessStartInfo(Path.Combine(folder,"piper","piper.exe")) { UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardError=true,StandardInputEncoding=new UTF8Encoding(false) };
+            start.ArgumentList.Add("--model");start.ArgumentList.Add(Path.Combine(folder,"ro_RO-mihai-medium.onnx"));
+            start.ArgumentList.Add("--output_file");start.ArgumentList.Add(wav);
+            start.ArgumentList.Add("--length_scale");start.ArgumentList.Add((1/Math.Clamp(rate,.5,2)).ToString(CultureInfo.InvariantCulture));
+            using var process=Process.Start(start) ?? throw new InvalidOperationException("Could not start Romanian speech.");
+            using var registration=token.Register(()=>{try{if(!process.HasExited)process.Kill(true);}catch(InvalidOperationException){}});
+            var errors=process.StandardError.ReadToEndAsync(token);
+            await process.StandardInput.WriteLineAsync(text.Replace('\n',' '));process.StandardInput.Close();
+            await process.WaitForExitAsync(token);
+            if(process.ExitCode!=0)throw new InvalidOperationException("Romanian synthesis failed: "+await errors);
+            using var reader=new WaveFileReader(wav);using var output=new WaveOutEvent();output.Init(reader);output.Volume=Math.Clamp(volume,0,100)/100f;
+            var done=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            output.PlaybackStopped+=(_,e)=>{if(e.Exception is not null)done.TrySetException(e.Exception);else done.TrySetResult();};
+            token.ThrowIfCancellationRequested();StatusChanged?.Invoke("speaking","Vorbesc");output.Play();
+            await done.Task.WaitAsync(token);
+            if(!token.IsCancellationRequested)StatusChanged?.Invoke("idle","Speech completed");
+        }
+        catch(OperationCanceledException) { }
+        catch(Exception error){if(!token.IsCancellationRequested)StatusChanged?.Invoke("error",error.Message);}
+        finally{try{File.Delete(wav);}catch(IOException){}}
+    }
     internal void Cancel()
     {
-        lock (gate) synth?.SpeakAsyncCancelAll();
+        lock (gate) { localSpeech?.Cancel(); current=null; synth?.SpeakAsyncCancelAll(); }
     }
     public void Dispose()
     {
-        lock (gate) { synth?.Dispose(); synth = null; current = null; }
+        lock (gate) { localSpeech?.Cancel(); synth?.Dispose(); synth = null; current = null; }
     }
 }
 

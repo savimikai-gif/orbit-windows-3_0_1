@@ -26,7 +26,7 @@ VersionInfoVersion=1.0.0.0
 [Tasks]
 Name: "desktopicon"; Description: "Create desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
 [Files]
-Source: "..\Publish\ORBIT.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Icons]
 Name: "{autoprograms}\ORBIT"; Filename: "{app}\ORBIT.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\ORBIT"; Filename: "{app}\ORBIT.exe"; Tasks: desktopicon; WorkingDir: "{app}"

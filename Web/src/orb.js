@@ -21,6 +21,8 @@ export function initializeOrb() {
     ctx.strokeStyle='#86dfff70';ctx.lineWidth=.65;
     for(let lat=-1.4;lat<1.5;lat+=.22){const points=[];for(let lon=0;lon<=6.4;lon+=.05)points.push(project(lat,lon));line(points);}
     for(let lon=0;lon<6.28;lon+=.26){const points=[];for(let lat=-1.57;lat<=1.57;lat+=.05)points.push(project(lat,lon));line(points);}
+    // Specular highlight and rim shading give the sphere solid depth.
+    const shine=ctx.createRadialGradient(-20,-24,0,-18,-22,25);shine.addColorStop(0,'#e5fbffbb');shine.addColorStop(.3,'#92e7ff55');shine.addColorStop(1,'#92e7ff00');ctx.fillStyle=shine;ctx.beginPath();ctx.arc(-18,-22,25,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='#80dfff';ctx.lineWidth=1;ctx.beginPath();ctx.arc(0,0,54,0,Math.PI*2);ctx.stroke();
     for(let i=0;i<64;i++){const a=i*Math.PI/32+phase*.07;ctx.strokeStyle=i%4?'#269bde66':'#68d4ffbb';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,78,a,a+.055);ctx.stroke();}
     for(let ring=0;ring<3;ring++){ctx.strokeStyle=['#2fa6ef90','#70d9ff65','#257ac970'][ring];ctx.lineWidth=ring===0?1.7:1;ctx.beginPath();for(let i=0;i<=240;i++){const a=i/240*Math.PI*2;const radius=100+ring*7+Math.sin(a*5+phase*(ring+1)*.5)*(talking?7:3);const x=Math.cos(a)*radius,y=Math.sin(a)*radius*(.92+ring*.02);if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.closePath();ctx.stroke();}

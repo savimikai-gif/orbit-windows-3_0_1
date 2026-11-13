@@ -63,6 +63,8 @@ const i18n = {
     sun: 'Du', mon: 'Lu', tue: 'Ma', wed: 'Mi', thu: 'Jo', fri: 'Vi', sat: 'Sâ',
   }
 };
+Object.assign(i18n.en,{"profileTheme":"Profile, theme & data","yourName":"Your name","theme":"Theme","animations":"Animations","voiceActivation":"ORBIT Voice Activation","localRecognition":"Local recognition · Romanian and English, automatic detection","pushTalk":"Push to talk","micOff":"Microphone off","assistantDiagnostics":"Assistant diagnostics","refreshLog":"Refresh log","openLogs":"Open logs folder","exportSettings":"Export settings","importSettings":"Import settings","resetProfile":"Reset profile","resetEverything":"Reset everything","lightTheme":"Light","darkTheme":"Dark","fullMotion":"Full","reducedMotion":"Reduced","offMotion":"Off"});
+Object.assign(i18n.ro,{"profileTheme":"Profil, temă și date","yourName":"Numele tău","theme":"Temă","animations":"Animații","voiceActivation":"Activare vocală ORBIT","localRecognition":"Recunoaștere locală · română și engleză, detectare automată","pushTalk":"Apasă și vorbește","micOff":"Oprește microfonul","assistantDiagnostics":"Diagnosticarea asistentului","refreshLog":"Actualizează jurnalul","openLogs":"Deschide jurnalele","exportSettings":"Exportă setările","importSettings":"Importă setările","resetProfile":"Resetează profilul","resetEverything":"Resetează tot","lightTheme":"Luminoasă","darkTheme":"Întunecată","fullMotion":"Complete","reducedMotion":"Reduse","offMotion":"Oprite"});
 i18n.en.neuralEngine = 'ORBIT Neural · English + Romanian'; i18n.ro.neuralEngine = 'ORBIT Neural · engleză + română';
 i18n.en.neuralReady = 'Voice pack ready: British English (Alan) + Romanian (Mihai).';
 i18n.ro.neuralReady = 'Vocile sunt pregătite: engleză britanică (Alan) + română (Mihai).';
@@ -77,8 +79,8 @@ i18n.en.evening = 'Evening · 18:00'; i18n.ro.evening = 'Seara · 18:00';
 i18n.en.customTimeHint = 'Or set an exact time'; i18n.ro.customTimeHint = 'Sau alege ora exactă';
 i18n.en.quickTimePast = 'That time has passed today. Moved to tomorrow.';
 i18n.ro.quickTimePast = 'Ora a trecut astăzi. Am mutat pe mâine.';
-i18n.en.voiceNote = 'ORBIT uses installed Windows voices offline, or your own Azure Speech resource for optional online neural voices.';
-i18n.ro.voiceNote = 'ORBIT folosește vocile Windows instalate offline sau resursa ta Azure Speech pentru voci neurale online opționale.';
+i18n.en.voiceNote = 'Local speech. Romanian uses the bundled voice; English uses your installed Windows voice.';
+i18n.ro.voiceNote = 'Vorbire locală. Vocea românească este inclusă; pentru engleză se folosește vocea instalată în Windows.';
 i18n.en.voiceEngine = 'Speech engine'; i18n.ro.voiceEngine = 'Motor vocal';
 i18n.en.systemEngine = 'Windows voice (built in)'; i18n.ro.systemEngine = 'Vocea Windows (integrată)';
 i18n.ro.today = 'Astăzi'; i18n.ro.tomorrow = 'Mâine'; i18n.ro.nextWeek = 'Peste o săptămână'; i18n.ro.time = 'Ora';
@@ -253,7 +255,7 @@ function applyLanguage() {
   renderQuickWeb();
   renderDays(); renderAll(); renderTimerUI(); renderMetrics(); showPage(activePage);
 }
-function setLanguage(lang) { settings.language = lang === 'ro' ? 'ro' : 'en'; saveSettings(); applyLanguage(); populateVoices(); }
+function setLanguage(lang) { settings.language = lang === 'ro' ? 'ro' : 'en'; settings.voiceURI=''; saveSettings(); applyLanguage(); populateVoices(); }
 function showPage(page) {
   activePage = page;
   document.querySelectorAll('.page').forEach(el => el.classList.toggle('hidden', el.id !== `page-${page}`));
@@ -945,7 +947,7 @@ function updateSpeechState(state, message='') {
   document.body.classList.toggle('orbit-speaking',state==='speaking');
   document.body.dataset.assistantStatus=state;
 }
-function recognitionLocale(){return settings.speechLanguage || 'en-US';}
+function recognitionLocale(){return 'auto';}
 async function talk() {
   if (!isTauri()) {toast('Microphone commands require the Windows app.');return;}
   try {await invoke('voice_push_to_talk',{language:recognitionLocale()});updateSpeechState('listening','Speak now');}
@@ -967,9 +969,15 @@ $('voiceOff').onclick=async()=>{
   settings.wakeEnabled=false;saveSettings();$('wakeToggle').checked=false;updateSpeechState('off');
 };
 $('speechLanguage').onchange=async(e)=>{
-  settings.speechLanguage=e.target.value;saveSettings();
+  settings.speechLanguage='auto';saveSettings();
   if(settings.wakeEnabled){$('wakeToggle').checked=false;await $('voiceOff').onclick();$('wakeToggle').checked=true;await $('wakeToggle').onchange({target:$('wakeToggle')});}
 };
+function localizeResponse(message) {
+  if(settings.language!=='ro')return message;
+  const exact={'Opening Windows Settings.':'Deschid setările Windows.','Audio muted.':'Sunetul a fost oprit.','Audio unmuted.':'Sunetul a fost pornit.','Brightness updated.':'Luminozitatea a fost actualizată.','Note saved.':'Notița a fost salvată.','Cancelled.':'Am anulat.','What should I write?':'Ce vrei să notez?','Choose a number from the app list.':'Alege un număr din lista de aplicații.'};
+  if(exact[message])return exact[message];
+  return message.replace(/^Opening (.+)\.$/,'Deschid $1.').replace(/^Windows volume is (\d+) percent\.$/,'Volumul Windows este la $1 la sută.').replace(/^What percentage should I set (volume|brightness) to\? Use a number from 0 to 100\.$/,(_,kind)=>'La ce nivel vrei '+(kind==='volume'?'volumul':'luminozitatea')+'? Alege un număr între 0 și 100.').replace(/^Which app\? /,'Ce aplicație dorești? ').replace('Say or type its number, or cancel.','Spune sau scrie numărul aplicației ori spune „cancel”.');
+}
 async function handleSpeech(text, fromVoice=false) {
   const original=String(text||'').trim();
   if(!original){assistantFeedback('Enter a command first.');return;}
@@ -978,7 +986,7 @@ async function handleSpeech(text, fromVoice=false) {
   logAssistant(fromVoice?'recognized-text':'typed-input',original);
   updateSpeechState('thinking',original.slice(0,100));
   assistantFeedback('Understanding: “'+original+'”');
-  const respond=(message)=>{assistantFeedback(message);void speak(message);};
+  const respond=(message)=>{const translated=localizeResponse(message);assistantFeedback(translated);void speak(translated);};
   try {
     if(!clean||/^(?:hey|hi|hello)\s*orbit$/.test(clean)) {respond('I am ready. Say a command or type it below.');return;}
     if(/^(help|commands|what can you do|ajutor|comenzi)$/.test(clean)){
