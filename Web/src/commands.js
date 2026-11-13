@@ -1,6 +1,6 @@
 export function normalizeCommand(text) {
   return String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
-    .replace(/[.!?,]+$/,'').replace(/^(?:(?:hey|okay|ok)\s+)?orbit[, ]*/, '')
+    .replace(/[.!?,]+$/,'').replace(/^(?:(?:hey|hei|okay|ok)\s+)?orbit[, ]*/, '')
     .replace(/^(?:please |can you |could you |would you |will you |i want you to )+/, '')
     .replace(/\s+(?:please|for me)$/, '').trim();
 }
@@ -12,8 +12,8 @@ function numeric(text) {
 }
 export const settingsPages = {'setari':'','setarile':'','setari bluetooth':'bluetooth','setarile bluetooth':'bluetooth','setari wifi':'network-wifi','setari de sunet':'sound','setari ecran':'display','settings':'','windows settings':'','display':'display','display settings':'display','brightness settings':'display','sound settings':'sound','audio settings':'sound','bluetooth':'bluetooth','bluetooth settings':'bluetooth','wifi':'network-wifi','wi-fi':'network-wifi','wifi settings':'network-wifi','network settings':'network','windows update':'windowsupdate','installed apps':'appsfeatures','microphone settings':'privacy-microphone','camera settings':'privacy-webcam','personalization':'personalization','power settings':'powersleep','notifications':'notifications','date and time':'dateandtime','printers':'printers','mouse settings':'mousetouchpad','keyboard settings':'keyboard','accessibility':'easeofaccess','storage settings':'storagesense','default apps':'defaultapps','accounts':'accounts'};
 export function parseDesktopCommand(text) {
-  let clean=normalizeCommand(text);
-  const romanian={'seteaza':'set','schimba':'change','mareste':'increase','ridica':'increase','scade':'decrease','redu':'reduce','volumul':'volume','volum':'volume','sunetul':'sound','luminozitatea':'brightness','luminozitate':'brightness','la':'to','cu':'by','procente':'percent','suta':'hundred','cincizeci':'fifty','douazeci':'twenty','treizeci':'thirty','patruzeci':'forty','saizeci':'sixty','saptezeci':'seventy','optzeci':'eighty','nouazeci':'ninety','zece':'ten'};
+  let clean=normalizeCommand(text).replace(/la suta/g,'percent').replace(/o suta/g,'one hundred').replace(/\bsi\b/g,' ');
+  const romanian={'unu':'one','doi':'two','doua':'two','trei':'three','patru':'four','cinci':'five','sase':'six','sapte':'seven','opt':'eight','noua':'nine','seteaza':'set','schimba':'change','mareste':'increase','ridica':'increase','scade':'decrease','redu':'reduce','volumul':'volume','volum':'volume','sunetul':'sound','luminozitatea':'brightness','luminozitate':'brightness','la':'to','cu':'by','procente':'percent','suta':'hundred','cincizeci':'fifty','douazeci':'twenty','treizeci':'thirty','patruzeci':'forty','saizeci':'sixty','saptezeci':'seventy','optzeci':'eighty','nouazeci':'ninety','zece':'ten'};
   clean=clean.replace(/\b\w+\b/g,word=>romanian[word]||word);
   clean=numeric(clean);
   if (/^(?:unmute|unmute (?:the )?(?:sound|audio|volume)|turn (?:the )?sound on)$/.test(clean)) return {command:'volume_mute',args:{enabled:false}};
@@ -39,4 +39,5 @@ export function matchApps(query, apps) {
   const best=Math.max(0,...candidates.map(x=>x.score));
   return [...new Map(candidates.filter(x=>x.score===best).map(x=>[nameKey(x.app.name),x.app])).values()];
 }
+
 

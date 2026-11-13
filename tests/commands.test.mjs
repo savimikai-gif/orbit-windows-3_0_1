@@ -25,4 +25,7 @@ for(let percent=0;percent<=100;percent++) {
 }
 assert.deepEqual(parse('Hey Orbit open Brave'),{app:'brave'});
 assert.deepEqual(parse('Hey Orbit brightness 60%'),{command:'brightness_set',args:{percent:60}});
+assert.deepEqual(parse('Hei Orbit setează volumul la cincizeci la sută'),{command:'volume_set',args:{percent:50}});
+assert.deepEqual(parse('setează luminozitatea la douăzeci și cinci la sută'),{command:'brightness_set',args:{percent:25}});
+assert.deepEqual(parse('deschide setările bluetooth'),{command:'settings_open',args:{page:'bluetooth'}});
 
