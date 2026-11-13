@@ -22,7 +22,7 @@ internal sealed class SpeechController : IDisposable
         lock(gate)
         {
             StopInternal();
-            string model=Path.Combine(AppContext.BaseDirectory,"Speech","ggml-base.bin");
+            string model=Path.Combine(AppContext.BaseDirectory,"Speech","ggml-small.bin");
             if(!File.Exists(model))throw new InvalidOperationException("The local speech model is missing. Reinstall ORBIT using the full installer.");
             factory ??= WhisperFactory.FromPath(model);
             handsFree=wakeEnabled;commandUntil=wakeEnabled?DateTime.MinValue:DateTime.UtcNow.AddSeconds(25);
@@ -90,5 +90,6 @@ internal sealed class SpeechController : IDisposable
     internal void Stop(){lock(gate){StopInternal();Report("off","Microphone off");}}
     public void Dispose(){lock(gate){disposed=true;StopInternal();}processing.Wait();try{factory?.Dispose();audio.Dispose();}finally{processing.Release();}}
 }
+
 
 

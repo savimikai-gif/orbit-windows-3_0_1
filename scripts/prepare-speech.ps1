@@ -5,7 +5,7 @@ function Download-SpeechFile([string]$url, [string]$name) {
     & curl.exe --fail --location --retry 3 $url --output (Join-Path $destination $name)
     if ($LASTEXITCODE -ne 0) { throw "Download failed: $name" }
 }
-Download-SpeechFile 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin' 'ggml-base.bin'
+Download-SpeechFile 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin' 'ggml-small.bin'
 Download-SpeechFile 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip' 'piper.zip'
 Expand-Archive (Join-Path $destination 'piper.zip') $destination -Force
 Remove-Item -LiteralPath (Join-Path $destination 'piper.zip')
@@ -26,5 +26,6 @@ https://github.com/microsoft/onnxruntime
 https://github.com/sandrohanea/whisper.net
 https://github.com/ggerganov/whisper.cpp
 "@ | Set-Content (Join-Path $destination 'THIRD-PARTY-NOTICES.txt')
+
 
 
